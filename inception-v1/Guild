@@ -1,0 +1,106 @@
+#-*-conf-*-
+
+###################################################################
+# Project
+###################################################################
+
+[project]
+
+  name                    = Inception v1
+  description             = 
+
+###################################################################
+# Model
+###################################################################
+
+[model "inception-v1"]
+
+  train = slim/train_image_classifier
+
+  evaluate = slim/eval_image_classifier \
+               --checkpoint_path $RUNDIR/train \
+               --eval_dir $EVALDIR
+
+###################################################################
+# Flags
+###################################################################
+
+[flags]
+
+  model_name = inception_v1
+  dataset_name = cifar10
+  dataset_dir = $PKGHOME/cifar10-1
+  dataset_split = train
+  train_dir = $RUNDIR/train
+
+  # Hyper parameters
+  
+  batch_size = 32
+  max_number_of_steps = 50000
+  save_summaries_secs = 15
+
+[flags "fine-tune"]
+
+  checkpoint_path = $PKGHOME/
+  checkpoint_exclude_scopes = InceptionV1/Logits,InceptionV1/AuxLogits
+  trainable_scopes = InceptionV1/Logits,InceptionV1/AuxLogits
+
+###################################################################
+# Fields
+###################################################################
+
+[field "loss"]
+
+  template = loss-field
+  label = Total loss
+  source = series/tf/train/total_loss_1
+
+[field "learning_rate"]
+
+  label = Learning rate
+  source = series/tf/train/learning_rate
+  reduce = last
+  color = green-500
+  format = 0.0000
+  icon = maps:directions-walk
+
+[field "steps"]
+
+  template = steps-field
+  source = series/tf/train/global_step/sec
+
+[field "time"]
+
+  template = time-field
+  source = series/tf/train/global_step/sec
+
+###################################################################
+# Series
+###################################################################
+
+[series "loss"]
+
+  title = Total loss
+  source = series/tf/train/total_loss_1
+
+[series "learning_rate"]
+
+  title = Learning rate
+  source = series/tf/train/learning_rate
+
+[series "op-cpu-percent"]
+
+  template = op-cpu-percent-series
+
+[series "op-memory"]
+
+  template = op-memory-series
+
+[series "gpu-percent"]
+
+  template = gpu-percent-series
+
+[series "gpu-memory"]
+
+  template = gpu-memory-series
+
